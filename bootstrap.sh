@@ -58,13 +58,13 @@ VHOST=$(cat <<EOF
     <VirtualHost *:80>
             ServerAdmin webmaster@localhost
 
-            DocumentRoot /var/www/cornershop/
+            DocumentRoot /var/www/webapp/
             Alias /webgrind /var/www/webgrind
             <Directory />
                     Options FollowSymLinks
                     AllowOverride All
             </Directory>
-            <Directory /var/www/cornershop/>
+            <Directory /var/www/webapp/>
                     Options Indexes FollowSymLinks MultiViews
                     AllowOverride All
                     Order allow,deny
@@ -162,4 +162,4 @@ sudo a2enmod rewrite
 sudo service apache2 restart
 
 # Create the BVL database
-mysql -uroot -proot < /var/www/cornershop/sql/cornershop.sql
+mysql -uroot -proot < /var/www/webapp/sql/setup.sql
