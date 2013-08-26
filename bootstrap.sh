@@ -15,6 +15,7 @@ apt-get install -y sqlite
 apt-get install -y php5-sqlite
 apt-get install -y curl
 apt-get install -y php5-curl
+apt-get install -y php5-xdebug
 apt-get install -y msmtp ca-certificates vim-nox
 
 # Install MySQL
@@ -57,12 +58,13 @@ VHOST=$(cat <<EOF
     <VirtualHost *:80>
             ServerAdmin webmaster@localhost
 
-            DocumentRoot /var/www/
+            DocumentRoot /var/www/cornershop/
+            Alias /webgrind /var/www/webgrind
             <Directory />
                     Options FollowSymLinks
                     AllowOverride All
             </Directory>
-            <Directory /var/www/>
+            <Directory /var/www/cornershop/>
                     Options Indexes FollowSymLinks MultiViews
                     AllowOverride All
                     Order allow,deny
@@ -136,6 +138,23 @@ echo "${MSMTP}" > /etc/msmtprc
 # Configure PHP to use MSMTP
 sudo sed -i "s[^;sendmail_path =.*[sendmail_path = '/usr/bin/msmtp -t'[g" /etc/php5/apache2/php.ini
 
+# Configure XDebug
+XDEBUG=$(cat <<EOF
+zend_extension=/usr/lib/php5/20090626+lfs/xdebug.so
+xdebug.profiler_enable=1
+xdebug.profiler_output_dir="/tmp"
+xdebug.profiler_append=0
+xdebug.profiler_output_name = "cachegrind.out.%t.%p"
+EOF
+)
+echo "${XDEBUG}" > /etc/php5/conf.d/xdebug.ini
+
+# Install webgrind if not already present
+if [ ! -d /var/www/webgrind ];
+then
+    git clone https://github.com/jokkedk/webgrind.git /var/www/webgrind
+fi
+
 # Enable mod_rewrite
 sudo a2enmod rewrite
 
@@ -143,4 +162,4 @@ sudo a2enmod rewrite
 sudo service apache2 restart
 
 # Create the BVL database
-mysql -uroot -proot < /var/www/sql/setup
+mysql -uroot -proot < /var/www/cornershop/sql/cornershop.sql
