@@ -161,5 +161,5 @@ sudo a2enmod rewrite
 # Restart Apache
 sudo service apache2 restart
 
-# Create the BVL database
+# Create the database
 mysql -uroot -proot < /var/www/webapp/sql/setup.sql
