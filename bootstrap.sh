@@ -168,6 +168,10 @@ then
     sudo chmod 777 /var/tmp/xhprof
 fi
 
+# Install Composer globally
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+
 # Enable mod_rewrite
 sudo a2enmod rewrite
 
