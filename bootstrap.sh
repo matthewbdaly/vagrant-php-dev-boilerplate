@@ -4,7 +4,10 @@
 apt-get update
 
 # Install requirements
-apt-get install -y apache2 build-essential checkinstall php5 php5-cli php5-mcrypt php5-gd php-apc git sqlite php5-sqlite curl php5-curl php5-dev php-pear php5-xdebug msmtp ca-certificates vim-nox 
+apt-get install -y apache2 build-essential checkinstall php5 php5-cli php5-mcrypt php5-gd php-apc git sqlite php5-sqlite curl php5-curl php5-dev php-pear php5-xdebug vim-nox ruby rubygems sqlite3 libsqlite3-dev
+
+# Install Mailcatcher
+sudo gem install mailcatcher
 
 # Install MySQL
 sudo debconf-set-selections <<< 'mysql-server-<version> mysql-server/root_password password root'
@@ -78,60 +81,8 @@ EOF
 )
 echo "${VHOST}" > /etc/apache2/sites-available/default
 
-# Configure MSMTP
-MSMTP=$(cat <<EOF
-# ------------------------------------------------------------------------------
-# msmtp System Wide Configuration file
-# ------------------------------------------------------------------------------
-
-# A system wide configuration is optional.
-# If it exists, it usually defines a default account.
-# This allows msmtp to be used like /usr/sbin/sendmail.
-
-# ------------------------------------------------------------------------------
-# Accounts
-# ------------------------------------------------------------------------------
-
-# Main Account
-defaults
-tls on
-tls_starttls on
-tls_trust_file /etc/ssl/certs/ca-certificates.crt
-
-account default
-host smtp.gmail.com
-port 587
-auth on
-from user@gmail.com
-user user@gmail.com
-password password
-logfile /var/log/msmtp.log
-
-# ------------------------------------------------------------------------------
-# Configurations
-# ------------------------------------------------------------------------------
-
-# Construct envelope-from addresses of the form "user@oursite.example".
-#auto_from on
-#maildomain fermmy.server
-
-# Use TLS.
-#tls on
-#tls_trust_file /etc/ssl/certs/ca-certificates.crt
-
-# Syslog logging with facility LOG_MAIL instead of the default LOG_USER.
-# Must be done within "account" sub-section above
-#syslog LOG_MAIL
-
-# Set a default account
-
-# ------------------------------------------------------------------------------
-EOF
-)
-echo "${MSMTP}" > /etc/msmtprc
-
-# Configure PHP to use MSMTP
-sudo sed -i "s[^;sendmail_path =.*[sendmail_path = '/usr/bin/msmtp -t'[g" /etc/php5/apache2/php.ini
+# Configure PHP to use Mailcatcher
+sudo sed -i "s[^;sendmail_path =.*[sendmail_path = '/usr/bin/env catchmail'[g" /etc/php5/apache2/php.ini
 
 # Configure XDebug
 XDEBUG=$(cat <<EOF
@@ -177,6 +128,9 @@ sudo a2enmod rewrite
 
 # Restart Apache
 sudo service apache2 restart
+
+# Start Mailcatcher
+mailcatcher --ip=0.0.0.0
 
 # Create the database
 mysql -uroot -proot < /var/www/webapp/sql/setup.sql
