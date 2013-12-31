@@ -5,4 +5,6 @@ A boilerplate Vagrant configuration for PHP development. Just download it and us
 
 It includes a full LAMP stack, as well as PHPMyAdmin, and `msmtp` to enable you to use a Gmail account for testing email functionality. Don't forget to set the email configuration in `bootstrap.sh`.
 
+It also includes Webgrind at http://192.168.56.101/webgrind/ and XHProf at http://192.168.56.101/xhprof/
+
 In addition, if you want to use MongoDB as your database instead of MySQL, there's an alternative bootstrap script at `mongobootstrap.sh` that sets up MongoDB instead of MySQL. To use it, replace the reference to `bootstrap.sh` in `Vagrantfile` with `mongobootstrap.sh`
