@@ -4,19 +4,7 @@
 apt-get update
 
 # Install requirements
-apt-get install -y apache2
-apt-get install -y php5
-apt-get install -y php5-cli
-apt-get install -y php5-mcrypt
-apt-get install -y php5-gd
-apt-get install -y php-apc
-apt-get install -y git
-apt-get install -y sqlite
-apt-get install -y php5-sqlite
-apt-get install -y curl
-apt-get install -y php5-curl
-apt-get install -y php5-xdebug
-apt-get install -y msmtp ca-certificates vim-nox
+apt-get install -y apache2 build-essential checkinstall php5 php5-cli php5-mcrypt php5-gd php-apc git sqlite php5-sqlite curl php5-curl php5-dev php-pear php5-xdebug msmtp ca-certificates vim-nox 
 
 # Install MySQL
 sudo debconf-set-selections <<< 'mysql-server-<version> mysql-server/root_password password root'
@@ -77,6 +65,13 @@ VHOST=$(cat <<EOF
                     Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
                     Order allow,deny
                     Allow from all
+            </Directory>
+            Alias /xhprof "/usr/share/php/xhprof_html"
+            <Directory "/usr/share/php/xhprof_html">
+                Options FollowSymLinks
+                AllowOverride All
+                Order allow,deny
+                allow from all
             </Directory>
     </VirtualHost>
 EOF
@@ -140,7 +135,7 @@ sudo sed -i "s[^;sendmail_path =.*[sendmail_path = '/usr/bin/msmtp -t'[g" /etc/p
 
 # Configure XDebug
 XDEBUG=$(cat <<EOF
-zend_extension=/usr/lib/php5/20090626+lfs/xdebug.so
+zend_extension=/usr/lib/php5/20100525/xdebug.so
 xdebug.profiler_enable=1
 xdebug.profiler_output_dir="/tmp"
 xdebug.profiler_append=0
@@ -153,6 +148,24 @@ echo "${XDEBUG}" > /etc/php5/conf.d/xdebug.ini
 if [ ! -d /var/www/webgrind ];
 then
     git clone https://github.com/jokkedk/webgrind.git /var/www/webgrind
+fi
+
+# Install XHProf
+CONFIG=$(cat <<EOF
+extension=xhprof.so
+xhprof.output_dir="/var/tmp/xhprof"
+EOF
+)
+echo "${CONFIG}" > /etc/php5/conf.d/xhprof.ini
+if [ ! -d /usr/share/php/xhprof_html ];
+then
+    sudo pecl install xhprof-beta
+fi
+
+if [ ! -d /var/tmp/xhprof ];
+then
+    sudo mkdir /var/tmp/xhprof
+    sudo chmod 777 /var/tmp/xhprof
 fi
 
 # Enable mod_rewrite

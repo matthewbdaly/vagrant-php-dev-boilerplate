@@ -4,8 +4,8 @@
 apt-get update
 
 # Install requirements
-apt-get install -y apache2 php5 php5-dev php5-cli php-pear mongodb php5-mcrypt php5-gd php-apc git curl php5-curl php5-xdebug msmtp ca-certificates vim-nox
-pecl install mongo
+apt-get install -y apache2 build-essential checkinstall php5 php5-cli php5-mcrypt php5-gd php-apc git sqlite php5-sqlite curl php5-curl php5-dev php-pear php5-xdebug msmtp ca-certificates vim-nox mongodb
+sudo pecl install mongo
 
 # Setup hosts file
 VHOST=$(cat <<EOF
@@ -31,6 +31,13 @@ VHOST=$(cat <<EOF
                     Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
                     Order allow,deny
                     Allow from all
+            </Directory>
+            Alias /xhprof "/usr/share/php/xhprof_html"
+            <Directory "/usr/share/php/xhprof_html">
+                Options FollowSymLinks
+                AllowOverride All
+                Order allow,deny
+                allow from all
             </Directory>
     </VirtualHost>
 EOF
@@ -111,6 +118,24 @@ echo "${XDEBUG}" > /etc/php5/conf.d/xdebug.ini
 if [ ! -d /var/www/webgrind ];
 then
     git clone https://github.com/jokkedk/webgrind.git /var/www/webgrind
+fi
+
+# Install XHProf
+CONFIG=$(cat <<EOF
+extension=xhprof.so
+xhprof.output_dir="/var/tmp/xhprof"
+EOF
+)
+echo "${CONFIG}" > /etc/php5/conf.d/xhprof.ini
+if [ ! -d /usr/share/php/xhprof_html ];
+then
+    sudo pecl install xhprof-beta
+fi
+
+if [ ! -d /var/tmp/xhprof ];
+then
+    sudo mkdir /var/tmp/xhprof
+    sudo chmod 777 /var/tmp/xhprof
 fi
 
 # Enable mod_rewrite
