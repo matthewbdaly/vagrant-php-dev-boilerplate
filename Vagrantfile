@@ -1,6 +1,6 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "precise32"
-  config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+  config.vm.box = "wheezy"
+  config.vm.box_url = "https://github.com/jose-lpa/packer-debian_7.6.0/releases/download/1.0/packer_virtualbox-iso_virtualbox.box"
 
   config.vm.network :private_network, ip: "192.168.56.101"
     config.ssh.forward_agent = true
