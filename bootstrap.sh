@@ -77,9 +77,6 @@ EOF
 )
 echo "${VHOST}" > /etc/apache2/sites-available/default
 
-# Configure PHP to use Mailcatcher
-sudo sed -i "s[^;sendmail_path =.*[sendmail_path = '/usr/bin/env catchmail'[g" /etc/php5/apache2/php.ini
-
 # Configure XDebug
 XDEBUG=$(cat <<EOF
 zend_extension=/usr/lib/php5/20100525/xdebug.so
